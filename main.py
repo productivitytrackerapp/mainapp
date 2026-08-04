@@ -8,7 +8,7 @@ import tldextract
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
 from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QVBoxLayout
 import sys
 # Helper functions
 stop_requested = False
@@ -351,21 +351,77 @@ def process_tracker_tick():
     with open("output.json", "w") as f:
         json.dump(productivity, f, indent=4)
 
-should_session_start = False
-should_session_start = input("Print Yes to start your session, Print No to not.")
-targetLetters = "yes"
-contains_letter = targetLetters.lower() in should_session_start.lower()
+#should_session_start = False
+#should_session_start = input("Print Yes to start your session, Print No to not.")
+#targetLetters = "yes"
+#contains_letter = targetLetters.lower() in should_session_start.lower()
+#
+#if contains_letter == True:
+#    should_session_start = True
+#    start_time = duration_start()
+#    listener = keyboard.Listener(on_press=on_press)
+#    listener.start()
+#
+#if should_session_start == True:
+#   while True:
+#        process_tracker_tick()
+#        if stop_requested == True:
+#            break
+#else:
+#    pass
 
-if contains_letter == True:
-    should_session_start = True
+
+app = QApplication(sys.argv)
+
+window = QWidget()
+#code
+timer = QTimer()
+def start_session():
+    global start_time
+    global website_totals
+    global app_totals
+    global idle_time_list
+    global stop_requested
+    global previous_app
+    global previous_domain
+    global start_app_time
+    global start_domain_time
+    global previous_idle_state1
+    global timer_paused
+    global app_timer_paused
+    global start_idle_counter
+    global end_idle_count
+    global final_idle_count
     start_time = duration_start()
-    listener = keyboard.Listener(on_press=on_press)
-    listener.start()
+    website_totals = {}
+    app_totals = {}
+    idle_time_list = []
+    stop_requested = False
+    previous_app = None
+    previous_domain = None
+    start_app_time = start_app()
+    start_domain_time = start_domain()
+    previous_idle_state1 = idle_or_not()
+    timer_paused = previous_idle_state1
+    app_timer_paused = previous_idle_state1
+    start_idle_counter = None
+    end_idle_count = None
+    final_idle_count = None
+    timer.start(2000)
+timer.timeout.connect(process_tracker_tick)
+def end_session():
+    global stop_requested
+    stop_requested = True 
+    process_tracker_tick()  
+    timer.stop() 
+layout = QVBoxLayout()
+start_button = QPushButton("Start session", window)
+start_button.clicked.connect(start_session)
+end_button = QPushButton("End session", window)
+end_button.clicked.connect(end_session)
+layout.addWidget(start_button)
+layout.addWidget(end_button)
+window.setLayout(layout)
+window.show()
 
-if should_session_start == True:
-    while True:
-        process_tracker_tick()
-        if stop_requested == True:
-            break
-else:
-    pass
+app.exec()
