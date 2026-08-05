@@ -8,7 +8,9 @@ import tldextract
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
 from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QVBoxLayout, QPlainTextEdit
+from PyQt6.QtCore import QTimer, QObject, QThread, pyqtSignal
+from PyQt6.QtWidgets import QLabel
 import sys
 # Helper functions
 stop_requested = False
@@ -329,28 +331,18 @@ def process_tracker_tick():
                     app_totals[previous_app] = app_spent
                 else:
                     app_totals[previous_app] += app_spent
-
     app_totals = dict(sorted(app_totals.items(), key=lambda item: item[1], reverse=True))
     website_totals = dict(sorted(website_totals.items(), key=lambda item: item[1], reverse=True))
     previous_idle_state1 = current_idle_state
-    total_time_spent_idle = 9
     productivity = {
-        "timestamp": date_time_function,
-        "app_name": current_app,
-        "window_title": get_title,
-        "browser_URL": url_title,
-        "domain": domain_name_extract,
-        "tab_title": tab_title,
         "duration": session_length,
-        "idle_state": current_idle_state,
         "time_spent_idle": total_idle_time,
         "most_frequented_websites": website_totals,
         "most_frequented_apps": app_totals,
     }
-    print(productivity)
     with open("output.json", "w") as f:
         json.dump(productivity, f, indent=4)
-
+    return productivity
 #should_session_start = False
 #should_session_start = input("Print Yes to start your session, Print No to not.")
 #targetLetters = "yes"
@@ -370,12 +362,28 @@ def process_tracker_tick():
 #else:
 #    pass
 
-
+class TrackerWorker(QObject):
+    tick_finished = pyqtSignal()
+    duration_update = pyqtSignal(float)
+    session_report = pyqtSignal(object)
+    def run_tick(self):
+        report = process_tracker_tick()
+        duration = report["duration"]
+        self.duration_update.emit(duration)
+        if stop_requested == True:
+            self.session_report.emit(report)
+        self.tick_finished.emit()
 app = QApplication(sys.argv)
 
 window = QWidget()
-#code
 timer = QTimer()
+timer.setSingleShot(True)
+
+tracker_thread = QThread()
+tracker_worker = TrackerWorker()
+tracker_worker.moveToThread(tracker_thread)
+timer.timeout.connect(tracker_worker.run_tick)
+tracker_thread.start()
 def start_session():
     global start_time
     global website_totals
@@ -407,21 +415,59 @@ def start_session():
     start_idle_counter = None
     end_idle_count = None
     final_idle_count = None
-    timer.start(2000)
-timer.timeout.connect(process_tracker_tick)
+    timer.start(500)
+def on_tick_finish():
+    if stop_requested:
+        timer.stop() 
+    else:
+        timer.start(500)
+def format_duration(seconds):
+    seconds = int(seconds)
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
+    return f"{hours:02}:{minutes:02}:{int(seconds):02}"
 def end_session():
     global stop_requested
-    stop_requested = True 
-    process_tracker_tick()  
-    timer.stop() 
+    stop_requested = True
+def print_duration(duration):
+    duration = str(duration)
+    duration_clock.setText("Duration: " + duration)
+def print_report(session_report):
+    print(session_report)
+    report_box.show()
+    duration_clock.hide()
+    start_button.hide()
+    end_button.hide()
+    formatted_duration = format_duration(session_report["duration"])
+    formatted_idle = format_duration(session_report["time_spent_idle"])
+    apps = session_report["most_frequented_apps"]
+    websites = session_report["most_frequented_websites"]
+    report = f"Duration: {formatted_duration}\nIdle Time: {formatted_idle}\n\nMost frequented Apps:\n"
+    for app, seconds in apps.items():
+        formatted_app = format_duration(seconds)
+        report += f"{app}: {formatted_app}\n"
+    report += "\nMost frequented Websites:\n"
+    for website, seconds in websites.items(): 
+        formatted_website = format_duration(seconds)
+        report += f"{website}: {formatted_website}\n"
+    report_box.setPlainText(report) 
+tracker_worker.duration_update.connect(print_duration)
+live_duration = "Duration: 0"
+duration_clock = QLabel(live_duration)
+report_box = QPlainTextEdit()
+report_box.hide()
 layout = QVBoxLayout()
 start_button = QPushButton("Start session", window)
 start_button.clicked.connect(start_session)
 end_button = QPushButton("End session", window)
 end_button.clicked.connect(end_session)
+tracker_worker.session_report.connect(print_report)
+tracker_worker.tick_finished.connect(on_tick_finish)
+layout.addWidget(duration_clock)
 layout.addWidget(start_button)
 layout.addWidget(end_button)
+layout.addWidget(report_box)
 window.setLayout(layout)
 window.show()
-
 app.exec()
