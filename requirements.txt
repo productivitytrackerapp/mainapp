@@ -1,0 +1,4 @@
+PyQt6
+pyobjc-framework-Quartz
+tldextract
+pynput
