@@ -1,5 +1,6 @@
 import time
 import json
+import analyzer
 import datetime
 from tracker import get_current_tab_URL, domain_name, get_current_tab_title, get_frontmost_app, get_frontmost_title, idle_or_not
 stop_requested = False
@@ -10,12 +11,14 @@ app_totals = {}
 previous_app = None
 app_timer_paused = False
 idle_time_list = []
-def start_session():
+current_goal = None
+def start_session(goal):
     global start_time
     global website_totals
     global app_totals
     global idle_time_list
     global stop_requested
+    global current_goal
     global previous_app
     global previous_domain
     global start_app_time
@@ -26,6 +29,7 @@ def start_session():
     global start_idle_counter
     global end_idle_count
     global final_idle_count
+    current_goal = goal
     start_time = duration_start()
     website_totals = {}
     app_totals = {}
@@ -217,12 +221,23 @@ def process_tracker_tick():
     app_totals = dict(sorted(app_totals.items(), key=lambda item: item[1], reverse=True))
     website_totals = dict(sorted(website_totals.items(), key=lambda item: item[1], reverse=True))
     previous_idle_state1 = current_idle_state
+    current_activity = (
+    current_app,
+    domain_name_extract,
+    tab_title,
+    get_title,
+    current_idle_state)
+
     productivity = {
         "duration": session_length,
         "time_spent_idle": total_idle_time,
         "most_frequented_websites": website_totals,
         "most_frequented_apps": app_totals,
+        "session_goal": current_goal,
     }
+    analyzer.recorded_activity(current_activity)
+    if stop_requested == True:
+        analyzer.analyze_session(productivity)
     with open("output.json", "w") as f:
         json.dump(productivity, f, indent=4)
     return productivity

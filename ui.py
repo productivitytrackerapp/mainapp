@@ -1,7 +1,7 @@
 import session
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QPlainTextEdit
 from PyQt6.QtCore import QTimer, QObject, QThread, pyqtSignal
-from PyQt6.QtWidgets import QLabel
+from PyQt6.QtWidgets import QLabel, QLineEdit
 import sys
 class TrackerWorker(QObject):
     tick_finished = pyqtSignal()
@@ -65,18 +65,26 @@ report_box = QPlainTextEdit()
 report_box.hide()
 layout = QVBoxLayout()
 start_button = QPushButton("Start session", window)
+goal_input = QLineEdit()
 def handle_start():
-    session.start_session()
+    goal = goal_input.setReadOnly(True)
+    goal = goal_input.text()
+    goal_input.hide()
+    session.start_session(goal)
+    start_button.setEnabled(False)
+    end_button.setEnabled(True)
     timer.start(500)
 start_button.clicked.connect(handle_start)
 end_button = QPushButton("End session", window)
 end_button.clicked.connect(session.end_session)
+end_button.setEnabled(False)
 tracker_worker.session_report.connect(print_report)
 tracker_worker.tick_finished.connect(on_tick_finish)
 layout.addWidget(duration_clock)
-layout.addWidget(start_button)
+layout.addWidget(start_button)  
 layout.addWidget(end_button)
 layout.addWidget(report_box)
+layout.addWidget(goal_input)
 window.setLayout(layout)
 window.show()
 app.exec()

@@ -88,3 +88,6 @@ def idle_or_not():
     return is_idle
 
 idle_state = idle_or_not()
+get_the_current_tab_URL = get_current_tab_URL()
+get_the_current_tab_title = get_current_tab_title()
+get_the_frontmost_title = get_frontmost_title()
