@@ -47,9 +47,10 @@ def print_report(session_report):
     end_button.hide()
     formatted_duration = format_duration(session_report["duration"])
     formatted_idle = format_duration(session_report["time_spent_idle"])
+    analysis = session_report["analysis"]
     apps = session_report["most_frequented_apps"]
     websites = session_report["most_frequented_websites"]
-    report = f"Duration: {formatted_duration}\nIdle Time: {formatted_idle}\n\nMost frequented Apps:\n"
+    report = f"Producitvity Score: {analysis["productivity_score"]}\nSession Classification: {analysis["classification"]}\nReason: {analysis["reason"]}\n\nDuration: {formatted_duration}\nIdle Time: {formatted_idle}\n\nMost frequented Apps:\n"
     for app, seconds in apps.items():
         formatted_app = format_duration(seconds)
         report += f"{app}: {formatted_app}\n"

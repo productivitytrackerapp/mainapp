@@ -1,16 +1,12 @@
 import json
 import tracker
 import requests
-def analyze_session(session_data):
-    print("analyze_session was called")
-    print(session_data)
 previous_activity = None
 activity_history = []
 def recorded_activity(activity):
     global previous_activity
     if activity != previous_activity:
         activity_history.append(activity)
-        print(activity_history)
         previous_activity = activity
 def analyze_session(session_data):
     history = activity_history
@@ -68,11 +64,22 @@ def analyze_session(session_data):
             "content": prompt
         }
     ],
-    "stream": False
+    "stream": False,
+    "format": "json"
     }
     response = requests.post(
         "http://localhost:11434/api/chat",
         json = data
     )
     response_data = response.json()
-    print(response_data["message"]["content"])
+    ollama_reply = response_data["message"]["content"]
+    ollama_reply = ollama_reply.strip()
+    ollama_reply = ollama_reply.removeprefix("```json")
+    ollama_reply = ollama_reply.removesuffix("```")
+    ollama_reply = ollama_reply.strip()
+    print(ollama_reply)
+    try:
+        analysis = json.loads(ollama_reply)
+    except:
+        raise ValueError
+    return analysis
