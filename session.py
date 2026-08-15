@@ -237,7 +237,8 @@ def process_tracker_tick():
     }
     analyzer.recorded_activity(current_activity)
     if stop_requested == True:
-        analyzer.analyze_session(productivity)
+        analysis = analyzer.analyze_session(productivity)
+        productivity["analysis"] = analysis
     with open("output.json", "w") as f:
         json.dump(productivity, f, indent=4)
     return productivity
