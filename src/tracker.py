@@ -1,5 +1,5 @@
 import subprocess
-import tldextract
+from tldextract import domain_name
 from idle_state import find_idle_state
 
 IDLE_LIMIT = 155
@@ -53,14 +53,6 @@ def get_current_tab_URL():
         return None
     return get_Applescript_URL(script)
 
-def domain_name(url_title):
-    url = url_title
-    if url == None:
-        return None
-    else:
-        ext = tldextract.extract(url)
-        print(ext.top_domain_under_public_suffix)
-        return ext.top_domain_under_public_suffix
 def get_current_tab_title():
     current_app = get_frontmost_app()
     if current_app == "Safari":
