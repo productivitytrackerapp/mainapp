@@ -18,7 +18,12 @@ int main(void) {
     snprintf(script, sizeof(script),
              "%s/Resources/src/main.py", path);
 
-    execl("/usr/bin/python3", "python3", script, NULL);
+    execl(
+    "/opt/homebrew/bin/python3.12",
+    "python3",
+    script,
+    NULL
+    );
 
     return 1;
 }
