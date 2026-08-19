@@ -2,7 +2,7 @@ import subprocess
 import tldextract
 from idle_state import find_idle_state
 
-IDLE_LIMIT = 5  
+IDLE_LIMIT = 155
 def get_Applescript_URL(script):
     result = subprocess.run(
         ['osascript', '-e', script],
