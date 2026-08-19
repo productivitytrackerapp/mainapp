@@ -1,13 +1,6 @@
 PyQt6==6.10.2
 PyQt6-Qt6==6.10.2
 PyQt6-sip==13.12.0
-
-pyobjc-core==11.1
-pyobjc-framework-Cocoa==11.1
-pyobjc-framework-Quartz==11.1
-pyobjc-framework-ApplicationServices==11.1
-pyobjc-framework-CoreText==11.1
-
 tldextract==5.3.0
 filelock==3.20.3
 requests==2.33.0
