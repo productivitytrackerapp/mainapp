@@ -1,12 +1,9 @@
 import subprocess
 import tldextract
 import Quartz
-IDLE_LIMIT = 155    
-def find_idle_state():
-    return Quartz.CGEventSourceSecondsSinceLastEventType(
-        Quartz.kCGEventSourceStateCombinedSessionState,
-        Quartz.kCGAnyInputEventType
-    )
+from idle_state import find_idle_state
+
+IDLE_LIMIT = 5  
 def get_Applescript_URL(script):
     result = subprocess.run(
         ['osascript', '-e', script],
