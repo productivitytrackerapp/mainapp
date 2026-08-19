@@ -1,5 +1,5 @@
 import json
-import tracker
+import tracker as tracker
 import requests
 previous_activity = None
 activity_history = []
@@ -51,6 +51,8 @@ def analyze_session(session_data):
     RETURN:
     Return only structured JSON with:
     productivity_score
+    productive_active_seconds
+    unproductive_active_seconds
     classification
     reason
     productive_activities
@@ -77,9 +79,16 @@ def analyze_session(session_data):
     ollama_reply = ollama_reply.removeprefix("```json")
     ollama_reply = ollama_reply.removesuffix("```")
     ollama_reply = ollama_reply.strip()
-    print(ollama_reply)
     try:
         analysis = json.loads(ollama_reply)
     except:
         raise ValueError
     return analysis
+#def productivity_formula(analysis):
+    if int(analysis["productive_active_seconds"]) == 0:
+        productivity_percentage = 0
+    else:
+        productivity_score = int(analysis["productive_active_seconds"]) / (int(analysis["unproductive_active_seconds"]) + int(analysis["productive_active_seconds"]))
+        productivity_percentage = productivity_score * 100
+    return productivity_percentage
+    ...

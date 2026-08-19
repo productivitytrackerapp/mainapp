@@ -1,4 +1,4 @@
-import session
+import session as session
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QPlainTextEdit
 from PyQt6.QtCore import QTimer, QObject, QThread, pyqtSignal
 from PyQt6.QtWidgets import QLabel, QLineEdit
@@ -50,7 +50,14 @@ def print_report(session_report):
     analysis = session_report["analysis"]
     apps = session_report["most_frequented_apps"]
     websites = session_report["most_frequented_websites"]
-    report = f"Producitvity Score: {analysis["productivity_score"]}\nSession Classification: {analysis["classification"]}\nReason: {analysis["reason"]}\n\nDuration: {formatted_duration}\nIdle Time: {formatted_idle}\n\nMost frequented Apps:\n"
+    report = (
+        f"Productivity Score: {analysis['productivity_score']}\n"
+        f"Session Classification: {analysis['classification']}\n"
+        f"Reason: {analysis['reason']}\n\n"
+        f"Duration: {formatted_duration}\n"
+        f"Idle Time: {formatted_idle}\n\n"
+        "Most frequented Apps:\n"
+    )
     for app, seconds in apps.items():
         formatted_app = format_duration(seconds)
         report += f"{app}: {formatted_app}\n"

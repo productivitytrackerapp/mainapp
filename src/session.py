@@ -1,6 +1,6 @@
 import time
 import json
-import analyzer
+import analyzer as analyzer
 import datetime
 from tracker import get_current_tab_URL, domain_name, get_current_tab_title, get_frontmost_app, get_frontmost_title, idle_or_not
 stop_requested = False
