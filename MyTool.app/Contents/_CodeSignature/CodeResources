@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/src/analyzer.py</key>
 		<data>
-		5c+DlnTM+qb90sE/dwv3HoiQ+ik=
+		Orjvbg+Bx8CjnLH7alxUNjNYh5Q=
 		</data>
 		<key>Resources/src/idle_state.py</key>
 		<data>
@@ -14,19 +14,27 @@
 		</data>
 		<key>Resources/src/main.py</key>
 		<data>
-		N5GFDbxERcIoLUyg1dZ0pGs/Lc4=
+		PC/cVmRw3t8d/TEbe+l0BTPeNiI=
+		</data>
+		<key>Resources/src/public_suffix_list.dat</key>
+		<data>
+		x7Ury4BT38NcwDOyswJxD1bcM9U=
 		</data>
 		<key>Resources/src/session.py</key>
 		<data>
 		OVeZmjtBvcVjMLGjQM0acjocTbM=
 		</data>
+		<key>Resources/src/tldextract.py</key>
+		<data>
+		ssrW6mT9ZIApo/UAErvLVDKjtWo=
+		</data>
 		<key>Resources/src/tracker.py</key>
 		<data>
-		4h5nA1+07/DgwtA77dNDZtsgU2Y=
+		Xu52gCBdCXntJlw+CpT1nbVwJII=
 		</data>
 		<key>Resources/src/ui.py</key>
 		<data>
-		r6H7TztF+GKGMayqsvyH/T3GAgg=
+		9VKMw7kUZGkwnQAgpPyYAluEhyE=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -35,7 +43,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			5MPn0hDli7a/n3UVLjZlwfmV/O0qKT1kJFlw9dBqakc=
+			d7wgFXYruCqv2/kXPZhVyxBFyX34hOe30IgUOt6/dio=
 			</data>
 		</dict>
 		<key>Resources/src/idle_state.py</key>
@@ -49,7 +57,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			6PY0hMY2tFCTM29HesvcE7WdIR8L7+lF1g6AeI+fQ3w=
+			aD1FdO4X2B+COsJ0MU3HV3DLxB1S2yx+E3YBCKNcDIE=
+			</data>
+		</dict>
+		<key>Resources/src/public_suffix_list.dat</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			CEpWdNd8HRSQCxbaX8iv7pdlry8ApjhVKox6oY9EroE=
 			</data>
 		</dict>
 		<key>Resources/src/session.py</key>
@@ -59,18 +74,25 @@
 			ch0sMZQFSCJStof5YP6Vx9nqHv5ouRNv81zPoRtfpmg=
 			</data>
 		</dict>
+		<key>Resources/src/tldextract.py</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			FUVriUmU5wkTUQ97ZxpswK3pBwSW1rYNlRSfqaf5GjQ=
+			</data>
+		</dict>
 		<key>Resources/src/tracker.py</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Z4u0YGvsZnDeZUso3FQUhcDiHSAZEx82dw0yIicdvdw=
+			6I6Ud35VIeyo67DPndb7Xoe0UzlpoHoA9Q4R9J5zRQA=
 			</data>
 		</dict>
 		<key>Resources/src/ui.py</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Yu9lQBFFt7PXMZsk8VYLyaFQ70XeNODDFEdsclhPRVU=
+			F6RZniWcCxjao9xlPbK0Sn41sRcOGq6gaWXQjuuEG+c=
 			</data>
 		</dict>
 	</dict>

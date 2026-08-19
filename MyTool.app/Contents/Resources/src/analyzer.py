@@ -1,6 +1,7 @@
 import json
-import tracker as tracker
-import requests
+import tracker
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 previous_activity = None
 activity_history = []
 def recorded_activity(activity):
@@ -69,11 +70,26 @@ def analyze_session(session_data):
     "stream": False,
     "format": "json"
     }
-    response = requests.post(
+    request_body = json.dumps(data).encode("utf-8")
+    ollama_request = Request(
         "http://localhost:11434/api/chat",
-        json = data
-    )
-    response_data = response.json()
+        data=request_body,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+        )
+    
+    try:
+        with urlopen(ollama_request, timeout=120) as response:
+            response_data = json.load(response)
+    except HTTPError as error:
+        error_message = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(
+            f"Ollama returned HTTP {error.code}: {error_message}"
+        ) from error
+    except URLError as error:
+        raise RuntimeError(
+            "Could not connect to Ollama at http://localhost:11434"
+        ) from error
     ollama_reply = response_data["message"]["content"]
     ollama_reply = ollama_reply.strip()
     ollama_reply = ollama_reply.removeprefix("```json")
