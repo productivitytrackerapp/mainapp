@@ -1,6 +1,5 @@
 import subprocess
 import tldextract
-import Quartz
 from idle_state import find_idle_state
 
 IDLE_LIMIT = 5  
