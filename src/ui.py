@@ -168,7 +168,7 @@ class ProductivityApp:
     def _show_report(self, data):
         analysis = data.get("analysis", {})
         lines = [
-            f"Productivity score: {analysis.get('productivity_score', '—')} / 100",
+            f"Productivity score: {data.get('productivity_score', '—')}%",
             f"Classification: {analysis.get('classification', 'Not analyzed')}",
             f"Reason: {analysis.get('reason', 'No explanation available.')}",
             "",
