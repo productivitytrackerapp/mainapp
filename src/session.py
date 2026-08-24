@@ -1,10 +1,11 @@
 import time
 import json
-import analyzer as analyzer
+import analyzer
 import datetime
 from tracker import get_current_tab_URL, domain_name, get_current_tab_title, get_frontmost_app, get_frontmost_title, idle_or_not
 stop_requested = False
 website_totals = {}
+productivity_score = None
 previous_domain = None
 timer_paused = False
 app_totals = {}
@@ -106,7 +107,10 @@ def process_tracker_tick():
     tab_title = get_current_tab_title()
 
     # Find App Name
-    current_app = get_frontmost_app()    
+    current_app = get_frontmost_app()
+    if current_app not in ("Safari", "Google Chrome"):
+        domain_name_extract = None
+        tab_title = None
     # Find window title.
     get_title = get_frontmost_title()
 
@@ -227,18 +231,29 @@ def process_tracker_tick():
     tab_title,
     get_title,
     current_idle_state)
-
     productivity = {
-        "duration": session_length,
-        "time_spent_idle": total_idle_time,
-        "most_frequented_websites": website_totals,
-        "most_frequented_apps": app_totals,
-        "session_goal": current_goal,
-    }
+            "duration": session_length,
+            "time_spent_idle": total_idle_time,
+            "most_frequented_websites": website_totals,
+            "most_frequented_apps": app_totals,
+            "session_goal": current_goal,
+        }
+    
     analyzer.recorded_activity(current_activity)
     if stop_requested == True:
         analysis = analyzer.analyze_session(productivity)
         productivity["analysis"] = analysis
-    with open("output.json", "w") as f:
-        json.dump(productivity, f, indent=4)
+        productivity_score = analyzer.productive_unproductive_formula(analysis)
+        productivity["productivity_score"] = productivity_score
+        print(analyzer.activity_history)
+        print(analysis)
+        print(productivity_score)
+        with open("output.json", "w") as f:
+            json.dump(productivity, f, indent=4)
+        global activity_history
+        global previous_activity
+        global previous_activity_timestamp
+        activity_history = []
+        previous_activity = None
+        previous_activity_timestamp = None
     return productivity
