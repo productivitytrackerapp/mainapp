@@ -21,99 +21,118 @@ def recorded_activity(activity):
             activity_history.append(history)
             previous_activity = activity
             previous_activity_timestamp = datetime.now()
+def reset_activity_history():
+    global activity_history
+    global previous_activity
+    global previous_activity_timestamp
+
+    activity_history = []
+    previous_activity = None
+    previous_activity_timestamp = datetime.now()
+def compared_domain_name_extract(domain_name_extract):
+    if domain_name_extract is None:
+        return None
+    fixed_domain_for_comparison = domain_name_extract.removesuffix(".com")
+    fixed_domain_for_comparison = fixed_domain_for_comparison.lower()
+    return fixed_domain_for_comparison
+def python_determination(goal, current_app, domain_name_extract):
+    fixed_domain = compared_domain_name_extract(domain_name_extract)
+    goal = goal.lower()
+    split_goal = goal.split()
+    current_app = current_app.lower()
+    for items in split_goal:
+        if items == fixed_domain:
+            return "productive"
+        elif items == current_app:
+            return "productive"
+    return None
 def analyze_session(session_data):
-    history = activity_history
+    local_decisions = []
+    unresolved_activities = []
+    history = unresolved_activities
     goal = session_data["session_goal"]
-    duration = session_data["duration"]
-    time_spent_idle = session_data["time_spent_idle"]
-    most_frequented_websites = session_data["most_frequented_websites"]
-    most_frequented_apps = session_data["most_frequented_apps"]
+    for segment in activity_history:
+        activity_id = segment["activity_id"]
+        current_app = segment["Activity"][0]
+        domain_name_extract = segment["Activity"][1]
+        python_result = python_determination(
+            goal,
+            current_app,
+            domain_name_extract
+        )
+        if python_result == "productive":
+            local_decisions.append({
+                "activity_id": activity_id,
+                "classification": python_result
+            })
+        else:
+            unresolved_activities.append(segment)
+    print("LOCAL:", local_decisions)
+    print("SENT TO OLLAMA:", history)
     #productivity_score = session_data["productivity_score1"]
     prompt = f"""
     The user's goal for the session was: {goal}
-    The user's most frequented websites were: {most_frequented_websites}
-    The user's most frequented apps were: {most_frequented_apps}
-    The user spent {time_spent_idle} seconds idle.
-    The session lasted {duration} seconds.
     The history, of every action the user performed in their session is: {history}.
-    ROLE:
-    You are evaluating whether a computer productivity session
-    was productive relative to the user's stated goal.
-
     TASK:
-    Evaluate the session and assign a productivity score from 0-100.
+    Classify every activity as either "productive" or "unproductive"
+    based ONLY on whether it directly contributes to the user's stated goal.
 
-    SCORING:
-    100 = session activity was almost entirely relevant to the goal
-    75 = mostly productive with minor distractions
-    50 = mixed productive and unproductive activity
-    25 = mostly unrelated activity
-    0 = no meaningful activity related to the goal
+    STRICT RULES:
+    - Do not judge an app or website by whether it is generally productive.
+    - Do not invent hypothetical connections between an activity and the goal.
+    - Use only the app, website, tab title, window title, and stated goal as evidence.
+    - If there is not clear evidence that an activity contributes to the goal,
+    classify it as "unproductive".
+    - Preserve every activity_id exactly.
+    - Include every activity_id exactly once.
+    - Do not calculate scores, percentages, or durations.
 
-    IMPORTANT:
-    Judge websites and applications relative to the user's goal.
-    Do not assume that an app or website is inherently productive
-    or unproductive.
+    GOAL MATCHING PRIORITY:
 
-    Consider:
-    - relevance of apps to the goal
-    - relevance of websites to the goal
-    - idle time relative to total duration
-    - amount of time spent on each activity
-    - activity/window/tab context when available
+    First determine whether the user's goal explicitly names an application,
+    website, or activity.
 
-    RETURN:
+    If the stated goal directly names a website or application, activity on that
+    website/application satisfies the goal unless there is explicit evidence that
+    it does not.
 
-    Return ONLY valid JSON.
+    Examples:
 
-    The JSON must have EXACTLY this structure:
+    Goal: "watch YouTube"
+    Any activity on youtube.com = productive.
+
+    Goal: "browse Reddit"
+    Any activity on reddit.com = productive.
+
+    Goal: "work in Python"
+    Activity in the Python/code editor = productive.
+
+    Do NOT judge whether the content itself is normally productive when using the
+    named application or website is itself the user's stated goal.
+
+    Only use tab titles and window titles to determine relevance when the goal
+    requires more specific context.
+
+    Example:
+    Goal: "study quadratics"
+    youtube.com alone is NOT sufficient.
+    A YouTube video clearly about quadratics = productive.
+    An unrelated entertainment video = unproductive.
+
+    RETURN ONLY VALID JSON IN EXACTLY THIS FORMAT:
 
     {{
-    "activities": [
-        {{
-        "activity_id": 1,
-        "classification": "productive"
-        }}
-    ],
-    "classification": "Productive",
-    "reason": "Brief explanation",
-    "productive_activities": [],
-    "unproductive_activities": []
+        "activities": [
+            {{
+                "activity_id": 1,
+                "classification": "productive"
+            }}
+        ]
     }}
-    RULES FOR "activities":
-    - Include exactly one object for EVERY activity segment provided in the activity history.
-    - Preserve each activity_id exactly as provided.
-    - Do not create new activity_ids.
-    - Do not omit any activity_ids.
-    - Each activity_id must appear exactly once.
-    - "classification" for each activity MUST be exactly one of:
-    - "productive"
-    - "unproductive"
-    - Do not return durations. Python will calculate durations separately.
-    - Judge each activity only relative to the user's stated session goal.
-
-    RULES FOR THE OVERALL "classification":
-    - It must be a string.
-    - It must be exactly one of:
-    - "Highly Productive"
-    - "Productive"
-    - "Mixed"
-    - "Unproductive"
-    - "Highly Unproductive"
-
-    RULES FOR "productive_activities" AND "unproductive_activities":
-    - These must be JSON arrays.
-    - They may contain short descriptions of the relevant activities.
-
-    IMPORTANT:
-    - Do not calculate a productivity percentage.
-    - Do not calculate productive or unproductive seconds.
-    - Do not estimate or invent time values.
-    - Do not wrap the response in markdown or ```json code fences.
-    - Do not include any text before or after the JSON object.
     """
     data = {
     "model": "gemma3:latest",
+     "keep_alive": -1,
     "messages": [
         {
             "role": "user",
@@ -130,7 +149,6 @@ def analyze_session(session_data):
         headers={"Content-Type": "application/json"},
         method="POST",
         )
-    
     try:
         with urlopen(ollama_request, timeout=120) as response:
             response_data = json.load(response)
@@ -152,7 +170,14 @@ def analyze_session(session_data):
         analysis = json.loads(ollama_reply)
     except:
         raise ValueError
-    print(analysis.keys())
+    analysis["activities"].extend(local_decisions)
+    print("LOCAL:", local_decisions)
+    print("UNRESOLVED:", unresolved_activities)
+    print("OLLAMA BEFORE MERGE:", analysis["activities"])
+
+    analysis["activities"].extend(local_decisions)
+
+    print("FINAL MERGED:", analysis["activities"])
     return analysis
 def productivity_formula_func(analysis):
     productive_time = 0
@@ -164,7 +189,7 @@ def productivity_formula_func(analysis):
                 if segment["activity_id"] == activity_id:
                     productive_time += segment["Time Spent"]
     return productive_time
-def unproductive_forumla(analysis):
+def unproductive_formula(analysis):
     unproductive_time = 0
     for item in analysis["activities"]:
         activity_id = item["activity_id"]
@@ -176,7 +201,7 @@ def unproductive_forumla(analysis):
     return unproductive_time
 def productive_unproductive_formula(analysis):
     productive = productivity_formula_func(analysis)
-    unproductive = unproductive_forumla(analysis)
+    unproductive = unproductive_formula(analysis)
     total_active = productive + unproductive
     if total_active == 0:
         percentage = 0
@@ -184,4 +209,3 @@ def productive_unproductive_formula(analysis):
         percentage = productive / total_active * 100
     print(analysis["activities"])
     return round(percentage, 1)
-

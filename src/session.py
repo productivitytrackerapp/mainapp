@@ -36,6 +36,7 @@ def start_session(goal):
     app_totals = {}
     idle_time_list = []
     stop_requested = False
+    analyzer.reset_activity_history()
     previous_app = None
     previous_domain = None
     start_app_time = start_app()
@@ -90,7 +91,6 @@ def process_tracker_tick():
     global previous_idle_state1, previous_domain, start_domain_time, timer_paused
     global previous_app, start_app_time, app_timer_paused, website_totals, app_totals
     global start_idle_counter, end_idle_count, final_idle_count
-
     # Start the session: Begin counting the time the user is spending in a session.
     # Additional delay
     # End the session: Stop counting the time the user has spent in a session.
@@ -188,7 +188,6 @@ def process_tracker_tick():
             start_timestamp = time.perf_counter()
             start_app_time = start_timestamp
             app_timer_paused = False
-
     # Stop Requests
     if stop_requested == True:
         if previous_domain:
@@ -199,7 +198,6 @@ def process_tracker_tick():
                     website_totals[previous_domain] = website_spent
                 else:
                     website_totals[previous_domain] += website_spent
-
     if stop_requested == True:
         if current_idle_state == True:
             final_idle_count = time.perf_counter()
@@ -250,10 +248,4 @@ def process_tracker_tick():
         print(productivity_score)
         with open("output.json", "w") as f:
             json.dump(productivity, f, indent=4)
-        global activity_history
-        global previous_activity
-        global previous_activity_timestamp
-        activity_history = []
-        previous_activity = None
-        previous_activity_timestamp = None
     return productivity
