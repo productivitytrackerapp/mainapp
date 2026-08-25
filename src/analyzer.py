@@ -171,13 +171,6 @@ def analyze_session(session_data):
     except:
         raise ValueError
     analysis["activities"].extend(local_decisions)
-    print("LOCAL:", local_decisions)
-    print("UNRESOLVED:", unresolved_activities)
-    print("OLLAMA BEFORE MERGE:", analysis["activities"])
-
-    analysis["activities"].extend(local_decisions)
-
-    print("FINAL MERGED:", analysis["activities"])
     return analysis
 def productivity_formula_func(analysis):
     productive_time = 0
